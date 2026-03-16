@@ -1,4 +1,4 @@
-export { apiClient, setTokenProvider } from "./client";
+export { apiClient, setTokenProvider, setBaseUrl } from "./client";
 
 import { apiClient } from "./client";
 import type {

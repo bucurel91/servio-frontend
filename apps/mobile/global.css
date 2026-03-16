@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tell react-native-css-interop to use class-based dark mode on web.
+   This prevents the "Cannot manually set color scheme" error from NativeWind v4. */
+:root {
+  --css-interop-darkMode: class dark;
+}
