@@ -1,7 +1,9 @@
 import { View, Text, TouchableOpacity, Image, useWindowDimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 const PINS = [
   { px: 0.22, py: 0.20, size: 180 },
@@ -11,7 +13,7 @@ const PINS = [
 
 function MapDecoration({ width }: { width: number }) {
   const W = width - 40;
-  const H = 215;
+  const H = 250;
 
   return (
     <View
@@ -51,10 +53,10 @@ export default function WelcomeScreen() {
 
   const topX = width;
   const bottomX = width * 0.02;
-  const cp1x = width * 1.2;
-  const cp1y = height * 0.22;
-  const cp2x = width * -0.2;
-  const cp2y = height * 0.78;
+  const cp1x = width * 1.4;
+  const cp1y = height * 0.20;
+  const cp2x = width * -0.4;
+  const cp2y = height * 0.80;
   const bluePath = `M ${topX},0 L ${width},0 L ${width},${height} L ${bottomX},${height} C ${cp2x},${cp2y} ${cp1x},${cp1y} ${topX},0 Z`;
 
   return (
@@ -64,26 +66,87 @@ export default function WelcomeScreen() {
       </Svg>
 
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 0, paddingBottom: 60, gap: 32 }}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 0, paddingBottom: 60, gap: 16 }}>
 
           {/* Logo + subtitle */}
-          <View style={{ alignItems: "center", paddingHorizontal: 16 }}>
+          <View style={{ alignItems: "center", paddingHorizontal: 16, gap: 4 }}>
             <Image
               source={require("../../assets/logo-servio.png")}
-              style={{ width: width - 10, height: 140 }}
+              style={{ width: width - 10, height: 140, marginBottom: -24 }}
               resizeMode="contain"
             />
-            <Text className="text-base text-muted text-center leading-6 font-bold" style={{ marginTop: -24 }}>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#1e3a5f", textAlign: "center" }}>
+              Rapid, simplu, de încredere.
+            </Text>
+            <Text style={{ fontSize: 13, color: "#6b7a99", textAlign: "center", lineHeight: 20 }}>
               Găsește cel mai bun service auto{"\n"}din Moldova.
             </Text>
           </View>
 
-          {/* Map + tagline below it */}
-          <View style={{ alignItems: "center", gap: 12 }}>
-            <MapDecoration width={width} />
-            <Text className="text-base text-muted text-center leading-6 font-bold" style={{ paddingHorizontal: 32 }}>
-              Rapid, simplu, de încredere.
-            </Text>
+          {/* Map */}
+          <MapDecoration width={width} />
+
+          {/* Premium feature panel */}
+          <View style={{ paddingHorizontal: 40, gap: 10, width: "100%" }}>
+
+            {/* Shadow wrapper */}
+            <View style={{
+              borderRadius: 24,
+              shadowColor: "#4A7CC7",
+              shadowOpacity: 0.12,
+              shadowRadius: 20,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 6,
+            }}>
+              {/* Base gradient — soft blue to lavender */}
+              <LinearGradient
+                colors={["rgba(120, 170, 255, 0.42)", "rgba(165, 135, 255, 0.35)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ borderRadius: 24, overflow: "hidden" }}
+              >
+                {/* Top-left gloss highlight */}
+                <LinearGradient
+                  colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0.8, y: 0.6 }}
+                  style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+                />
+
+                {/* Inner white border for glass edge */}
+                <View style={{
+                  borderRadius: 23,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.7)",
+                  paddingVertical: 2,
+                  paddingHorizontal: 14,
+                }}>
+                  {[
+                    "Programare rapidă și simplă",
+                    "Găsește service-uri aproape de tine",
+                    "Service-uri de încredere",
+                  ].map((item, i, arr) => (
+                    <View key={i}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 9 }}>
+                        <View style={{
+                          width: 22, height: 22, borderRadius: 11,
+                          backgroundColor: "#0D9488",
+                          alignItems: "center", justifyContent: "center",
+                          shadowColor: "#0D9488", shadowOpacity: 0.25,
+                          shadowRadius: 5, shadowOffset: { width: 0, height: 2 },
+                        }}>
+                          <Ionicons name="checkmark" size={12} color="white" />
+                        </View>
+                        <Text style={{ color: "#0f2a50", fontWeight: "700", fontSize: 13 }}>{item}</Text>
+                      </View>
+                      {i < arr.length - 1 && (
+                        <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </LinearGradient>
+            </View>
           </View>
 
           {/* Buttons */}

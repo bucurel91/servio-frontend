@@ -6,10 +6,10 @@ export function AuthBackground({ children }: { children: React.ReactNode }) {
 
   const topX = width;
   const bottomX = width * 0.02;
-  const cp1x = width * 1.2;
-  const cp1y = height * 0.22;
-  const cp2x = width * -0.2;
-  const cp2y = height * 0.78;
+  const cp1x = width * 1.4;
+  const cp1y = height * 0.20;
+  const cp2x = width * -0.4;
+  const cp2y = height * 0.80;
   const bluePath = `M ${topX},0 L ${width},0 L ${width},${height} L ${bottomX},${height} C ${cp2x},${cp2y} ${cp1x},${cp1y} ${topX},0 Z`;
 
   return (
