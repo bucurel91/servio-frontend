@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthBackground } from "../../components/AuthBackground";
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { firebaseAuth, isFirebaseConfigured } from "../../lib/firebase";
 import { authApi } from "@servio/api";
@@ -97,7 +98,8 @@ export default function RegisterScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <AuthBackground>
+    <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -124,8 +126,8 @@ export default function RegisterScreen() {
                 key={r.value}
                 className={`flex-1 border rounded-xl p-3 ${
                   role === r.value
-                    ? "border-primary bg-blue-50"
-                    : "border-gray-200"
+                    ? "border-primary bg-white"
+                    : "border-gray-200 bg-white"
                 }`}
                 onPress={() => setRole(r.value)}
               >
@@ -150,7 +152,7 @@ export default function RegisterScreen() {
                 Prenume *
               </Text>
               <TextInput
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
+                className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 bg-white"
                 placeholder="Ion"
                 value={firstName}
                 onChangeText={setFirstName}
@@ -161,7 +163,7 @@ export default function RegisterScreen() {
                 Nume *
               </Text>
               <TextInput
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
+                className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 bg-white"
                 placeholder="Popescu"
                 value={lastName}
                 onChangeText={setLastName}
@@ -171,7 +173,7 @@ export default function RegisterScreen() {
 
           <Text className="text-sm font-medium text-gray-700 mb-1">Email *</Text>
           <TextInput
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4 bg-white"
             placeholder="email@exemplu.com"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -184,7 +186,7 @@ export default function RegisterScreen() {
             Telefon (opțional)
           </Text>
           <TextInput
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4 bg-white"
             placeholder="+37369000000"
             keyboardType="phone-pad"
             value={phone}
@@ -193,7 +195,7 @@ export default function RegisterScreen() {
 
           <Text className="text-sm font-medium text-gray-700 mb-1">Parolă *</Text>
           <TextInput
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4 bg-white"
             placeholder="Minim 6 caractere"
             secureTextEntry
             value={password}
@@ -222,5 +224,6 @@ export default function RegisterScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </AuthBackground>
   );
 }

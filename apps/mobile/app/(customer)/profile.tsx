@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { firebaseAuth } from "../../lib/firebase";
 import { useAuthStore } from "../../store/auth";
 
 export default function ProfileScreen() {
   const { user, setUser } = useAuthStore();
+  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
 
   async function handleLogout() {
     await signOut(firebaseAuth!);
     setUser(null);
+    router.replace("/(auth)/welcome");
   }
 
   return (

@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { AuthBackground } from "../../components/AuthBackground";
 import { firebaseAuth, isFirebaseConfigured } from "../../lib/firebase";
 import { authApi } from "@servio/api";
 import { useAuthStore } from "../../store/auth";
@@ -60,7 +61,8 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <AuthBackground>
+    <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -79,7 +81,7 @@ export default function LoginScreen() {
 
           <Text className="text-sm font-medium text-gray-700 mb-1">Email</Text>
           <TextInput
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4 bg-white"
             placeholder="email@exemplu.com"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -90,7 +92,7 @@ export default function LoginScreen() {
 
           <Text className="text-sm font-medium text-gray-700 mb-1">Parolă</Text>
           <TextInput
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900 mb-4 bg-white"
             placeholder="••••••••"
             secureTextEntry
             value={password}
@@ -126,5 +128,6 @@ export default function LoginScreen() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </AuthBackground>
   );
 }
