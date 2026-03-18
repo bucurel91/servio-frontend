@@ -79,72 +79,67 @@ export default function WelcomeScreen() {
               Rapid, simplu, de încredere.
             </Text>
             <Text style={{ fontSize: 13, color: "#6b7a99", textAlign: "center", lineHeight: 20 }}>
-              Găsește cel mai bun service auto{"\n"}din Moldova.
+              Găsește cel mai potrivit service auto{"\n"}pentru tine.
             </Text>
           </View>
 
           {/* Map */}
           <MapDecoration width={width} />
 
-          {/* Premium feature panel */}
-          <View style={{ paddingHorizontal: 40, gap: 10, width: "100%" }}>
-
-            {/* Shadow wrapper */}
+          {/* Feature panel */}
+          <View style={{ paddingHorizontal: 32, width: "100%" }}>
             <View style={{
-              borderRadius: 24,
-              shadowColor: "#4A7CC7",
-              shadowOpacity: 0.12,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: 6 },
+              borderRadius: 14,
+              shadowColor: "#7B6FC4", shadowOpacity: 0.18,
+              shadowRadius: 16, shadowOffset: { width: 0, height: 5 },
               elevation: 6,
             }}>
-              {/* Base gradient — soft blue to lavender */}
               <LinearGradient
-                colors={["rgba(120, 170, 255, 0.42)", "rgba(165, 135, 255, 0.35)"]}
+                colors={["rgba(185,225,255,0.35)", "rgba(185,195,245,0.3)", "rgba(200,175,240,0.28)"]}
+                locations={[0, 0.5, 1]}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ borderRadius: 24, overflow: "hidden" }}
+                end={{ x: 0, y: 1 }}
+                style={{ borderRadius: 14, overflow: "hidden", paddingVertical: 6, paddingHorizontal: 16 }}
               >
-                {/* Top-left gloss highlight */}
-                <LinearGradient
-                  colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0.8, y: 0.6 }}
-                  style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-                />
+                {/* Bubbles — top right: sparse */}
+                <View style={{ position: "absolute", top: 5,  right: 12, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                <View style={{ position: "absolute", top: 10, right: 30, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
 
-                {/* Inner white border for glass edge */}
-                <View style={{
-                  borderRadius: 23,
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.7)",
-                  paddingVertical: 2,
-                  paddingHorizontal: 14,
-                }}>
-                  {[
-                    "Programare rapidă și simplă",
-                    "Găsește service-uri aproape de tine",
-                    "Service-uri de încredere",
-                  ].map((item, i, arr) => (
-                    <View key={i}>
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 9 }}>
-                        <View style={{
-                          width: 22, height: 22, borderRadius: 11,
-                          backgroundColor: "#0D9488",
-                          alignItems: "center", justifyContent: "center",
-                          shadowColor: "#0D9488", shadowOpacity: 0.25,
-                          shadowRadius: 5, shadowOffset: { width: 0, height: 2 },
-                        }}>
-                          <Ionicons name="checkmark" size={12} color="white" />
-                        </View>
-                        <Text style={{ color: "#0f2a50", fontWeight: "700", fontSize: 13 }}>{item}</Text>
+                {/* Bubbles — middle right: moderate */}
+                <View style={{ position: "absolute", top: "33%", right: 8,  width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.35)" }} />
+                <View style={{ position: "absolute", top: "38%", right: 22, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                <View style={{ position: "absolute", top: "44%", right: 10, width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.4)" }} />
+                <View style={{ position: "absolute", top: "42%", right: 38, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
+
+                {/* Bubbles — bottom right: dense */}
+                <View style={{ position: "absolute", bottom: 4,  right: 6,  width: 7, height: 7, borderRadius: 4, backgroundColor: "rgba(255,255,255,0.5)" }} />
+                <View style={{ position: "absolute", bottom: 10, right: 18, width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.45)" }} />
+                <View style={{ position: "absolute", bottom: 4,  right: 30, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.4)" }} />
+                <View style={{ position: "absolute", bottom: 14, right: 8,  width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.4)" }} />
+                <View style={{ position: "absolute", bottom: 8,  right: 44, width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.35)" }} />
+                <View style={{ position: "absolute", bottom: 18, right: 22, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.35)" }} />
+                <View style={{ position: "absolute", bottom: 6,  right: 58, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                <View style={{ position: "absolute", bottom: 20, right: 40, width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                <View style={{ position: "absolute", bottom: 12, right: 68, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
+                <View style={{ position: "absolute", bottom: 24, right: 12, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.4)" }} />
+
+                {[
+                  "Descrie problema mașinii",
+                  "Primește oferte de la service-uri",
+                  "Alege cea mai bună opțiune",
+                ].map((item, i, arr) => (
+                  <View key={i}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 }}>
+                      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: "#2EB88A", alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="checkmark" size={14} color="white" />
                       </View>
-                      {i < arr.length - 1 && (
-                        <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.3)" }} />
-                      )}
+                      <Text style={{ color: "#0f2a50", fontWeight: "700", fontSize: 14 }}>{item}</Text>
                     </View>
-                  ))}
-                </View>
+                    {i < arr.length - 1 && (
+                      <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.4)" }} />
+                    )}
+                  </View>
+                ))}
               </LinearGradient>
             </View>
           </View>
