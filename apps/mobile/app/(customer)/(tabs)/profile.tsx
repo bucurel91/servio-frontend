@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
-import { firebaseAuth } from "../../lib/firebase";
-import { useAuthStore } from "../../store/auth";
+import { firebaseAuth } from "../../../lib/firebase";
+import { useAuthStore } from "../../../store/auth";
 
 export default function ProfileScreen() {
   const { user, setUser } = useAuthStore();

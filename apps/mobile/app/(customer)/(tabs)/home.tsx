@@ -1,38 +1,17 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image, useWindowDimensions, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-
-const ACTIVE_REQUESTS = [
-  {
-    id: 1,
-    car: "Volkswagen Golf",
-    statusLabel: "În așteptare",
-    statusColor: "#F59E0B",
-    subtitle: "3 service-uri au răspuns",
-    icon: "time-outline" as const,
-    iconColor: "#F59E0B",
-    iconBg: "#FEF3C7",
-  },
-  {
-    id: 2,
-    car: "Audi A4",
-    statusLabel: "Programare confirmată",
-    statusColor: "#10B981",
-    subtitle: "Luni, 14:00 - AutoFix",
-    icon: "calendar-outline" as const,
-    iconColor: "#10B981",
-    iconBg: "#D1FAE5",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { requestsApi } from "@servio/api";
+import type { RepairRequestResponse } from "@servio/types";
 
 const NEARBY_SERVICES = [
   { id: 1, name: "AutoFix", rating: 4.8, distance: "1,2 km" },
   { id: 2, name: "CarPro Service", rating: 4.7, distance: "2,0 km" },
 ];
-
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -58,9 +37,20 @@ const CARD: object = {
   elevation: 3,
 };
 
+function statusStyle(status: string): { label: string; color: string; iconName: "time-outline" | "checkmark-circle-outline"; iconBg: string } {
+  if (status === "OPEN") return { label: "În așteptare", color: "#F59E0B", iconName: "time-outline", iconBg: "#FEF3C7" };
+  return { label: "Închisă", color: "#6b7280", iconName: "checkmark-circle-outline", iconBg: "#F3F4F6" };
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
+
+  const { data: requestsPage, isLoading: requestsLoading } = useQuery({
+    queryKey: ["my-requests"],
+    queryFn: () => requestsApi.getMy({ size: 5 }),
+  });
+  const activeRequests = requestsPage?.content ?? [];
 
   const topX = width;
   const bottomX = width * 0.02;
@@ -81,7 +71,7 @@ export default function HomeScreen() {
           {/* Header */}
           <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 0 }}>
             <Image
-              source={require("../../assets/logo-servio.png")}
+              source={require("../../../assets/logo-servio.png")}
               style={{ width: 340, height: 125 }}
               resizeMode="contain"
             />
@@ -108,21 +98,16 @@ export default function HomeScreen() {
                 locations={[0, 0.5, 1]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={{ borderRadius: 20, padding: 20 }}
+                style={{ borderRadius: 20, padding: 20, overflow: "hidden" }}
               >
               <View style={{ minHeight: 130 }}>
-                {/* Bubbles — top right: sparse */}
                 <View style={{ position: "absolute", top: 5,  right: 60, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)" }} />
                 <View style={{ position: "absolute", top: 12, right: 80, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
                 <View style={{ position: "absolute", top: 8,  right: 45, width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.2)" }} />
-
-                {/* Bubbles — middle right: moderate */}
                 <View style={{ position: "absolute", top: "35%", right: 55, width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.35)" }} />
                 <View style={{ position: "absolute", top: "40%", right: 72, width: 4, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)" }} />
                 <View style={{ position: "absolute", top: "45%", right: 42, width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.4)" }} />
                 <View style={{ position: "absolute", top: "38%", right: 90, width: 3, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
-
-                {/* Bubbles — bottom right: dense cluster below car wheel */}
                 <View style={{ position: "absolute", bottom: 4,  right: 50,  width: 7,  height: 7,  borderRadius: 4, backgroundColor: "rgba(255,255,255,0.5)"  }} />
                 <View style={{ position: "absolute", bottom: 12, right: 65,  width: 5,  height: 5,  borderRadius: 3, backgroundColor: "rgba(255,255,255,0.45)" }} />
                 <View style={{ position: "absolute", bottom: 5,  right: 80,  width: 4,  height: 4,  borderRadius: 2, backgroundColor: "rgba(255,255,255,0.4)"  }} />
@@ -132,7 +117,6 @@ export default function HomeScreen() {
                 <View style={{ position: "absolute", bottom: 6,  right: 108, width: 3,  height: 3,  borderRadius: 2, backgroundColor: "rgba(255,255,255,0.3)"  }} />
                 <View style={{ position: "absolute", bottom: 22, right: 88,  width: 5,  height: 5,  borderRadius: 3, backgroundColor: "rgba(255,255,255,0.3)"  }} />
                 <View style={{ position: "absolute", bottom: 14, right: 118, width: 4,  height: 4,  borderRadius: 2, backgroundColor: "rgba(255,255,255,0.25)" }} />
-                {/* Extra bubble cluster — below back wheel (far right of car) */}
                 <View style={{ position: "absolute", bottom: 2,  right: 5,  width: 8,  height: 8,  borderRadius: 4, backgroundColor: "rgba(255,255,255,0.5)"  }} />
                 <View style={{ position: "absolute", bottom: 10, right: 18, width: 6,  height: 6,  borderRadius: 3, backgroundColor: "rgba(255,255,255,0.45)" }} />
                 <View style={{ position: "absolute", bottom: 20, right: 8,  width: 5,  height: 5,  borderRadius: 3, backgroundColor: "rgba(255,255,255,0.4)"  }} />
@@ -166,11 +150,13 @@ export default function HomeScreen() {
                     <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>Creează cerere</Text>
                   </TouchableOpacity>
                 </View>
-                <Image
-                  source={require("../../assets/car.png")}
-                  style={{ position: "absolute", right: -70, bottom: -55, width: 330, height: 265 }}
-                  resizeMode="contain"
-                />
+                <View pointerEvents="none" style={{ position: "absolute", right: -70, bottom: -55, width: 330, height: 265 }}>
+                  <Image
+                    source={require("../../../assets/car.png")}
+                    style={{ width: 330, height: 265 }}
+                    resizeMode="contain"
+                  />
+                </View>
               </View>
               </LinearGradient>
             </View>
@@ -181,29 +167,33 @@ export default function HomeScreen() {
                 Cereri active
               </Text>
               <View style={{ gap: 10 }}>
-                {ACTIVE_REQUESTS.map((req) => (
-                  <TouchableOpacity key={req.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }}>
-                    <View style={{
-                      width: 44, height: 44, borderRadius: 22,
-                      backgroundColor: req.iconBg,
-                      alignItems: "center", justifyContent: "center",
-                    }}>
-                      <Ionicons name={req.icon} size={22} color={req.iconColor} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 15, fontWeight: "600", color: "#1e3a5f" }}>{req.car}</Text>
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 }}>
-                        <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: req.statusColor }} />
-                        <Text style={{ fontSize: 12, color: req.statusColor, fontWeight: "500" }}>{req.statusLabel}</Text>
-                      </View>
-                      <Text style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>{req.subtitle}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
-                  </TouchableOpacity>
-                ))}
+                {requestsLoading && (
+                  <ActivityIndicator color="#2563EB" style={{ marginVertical: 12 }} />
+                )}
 
-                {/* Empty state (shown when no requests) */}
-                {ACTIVE_REQUESTS.length === 0 && (
+                {!requestsLoading && activeRequests.map((req) => {
+                  const s = statusStyle(req.status);
+                  return (
+                    <TouchableOpacity key={req.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                      <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: s.iconBg, alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name={s.iconName} size={22} color={s.color} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 15, fontWeight: "600", color: "#1e3a5f" }}>
+                          {req.car.brand} {req.car.model}
+                        </Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 }}>
+                          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: s.color }} />
+                          <Text style={{ fontSize: 12, color: s.color, fontWeight: "500" }}>{s.label}</Text>
+                        </View>
+                        <Text style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>{req.title}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+                    </TouchableOpacity>
+                  );
+                })}
+
+                {!requestsLoading && activeRequests.length === 0 && (
                   <TouchableOpacity
                     style={{ ...CARD, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
                     onPress={() => router.push("/(customer)/post-request")}
@@ -222,7 +212,7 @@ export default function HomeScreen() {
             <View>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f" }}>Service-uri aproape</Text>
-                <TouchableOpacity onPress={() => router.push("/(customer)/services")}>
+                <TouchableOpacity onPress={() => router.push("/(customer)/(tabs)/services")}>
                   <Text style={{ fontSize: 13, color: "#2563EB", fontWeight: "500" }}>Vezi toate {">"}</Text>
                 </TouchableOpacity>
               </View>
@@ -251,14 +241,14 @@ export default function HomeScreen() {
             <View style={{ flexDirection: "row", gap: 12 }}>
               <TouchableOpacity
                 style={{ ...CARD, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16 }}
-                onPress={() => router.push("/(customer)/cars")}
+                onPress={() => router.push("/(customer)/(tabs)/cars")}
               >
                 <Ionicons name="car-outline" size={20} color="#2563EB" />
                 <Text style={{ fontSize: 13, fontWeight: "600", color: "#1e3a5f" }}>Mașinile mele</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ ...CARD, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16 }}
-                onPress={() => router.push("/(customer)/services")}
+                onPress={() => router.push("/(customer)/(tabs)/services")}
               >
                 <Ionicons name="build-outline" size={20} color="#2563EB" />
                 <Text style={{ fontSize: 13, fontWeight: "600", color: "#1e3a5f" }}>Vezi service-uri</Text>

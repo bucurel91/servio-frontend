@@ -181,10 +181,12 @@ List all open repair requests (paginated).
       "createdAt": "2025-01-01T10:00:00"
     }
   ],
-  "totalElements": 100,
-  "totalPages": 5,
-  "number": 0,
-  "size": 20
+  "page": {
+    "totalElements": 100,
+    "totalPages": 5,
+    "number": 0,
+    "size": 20
+  }
 }
 ```
 

@@ -2,6 +2,9 @@ import "../global.css";
 
 import { useEffect } from "react";
 import { Stack } from "expo-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 import { onAuthStateChanged } from "firebase/auth";
 import Constants from "expo-constants";
 import { firebaseAuth, isFirebaseConfigured } from "../lib/firebase";
@@ -64,11 +67,13 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(customer)" />
-      <Stack.Screen name="(service)" />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(customer)" />
+        <Stack.Screen name="(service)" />
+      </Stack>
+    </QueryClientProvider>
   );
 }
