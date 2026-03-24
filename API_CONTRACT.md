@@ -32,7 +32,8 @@ Register a new user (first time only).
   "firstName": "string",
   "lastName": "string",
   "phone": "string | null",
-  "role": "CUSTOMER | AUTO_SERVICE | ADMIN"
+  "role": "CUSTOMER | AUTO_SERVICE | ADMIN",
+  "cityId": "Long | null"
 }
 ```
 
@@ -81,6 +82,8 @@ Fetch current user profile. Use this after login to get userId and role.
   "phone": "+37369000000",
   "role": "CUSTOMER",
   "status": "ACTIVE",
+  "cityId": 1,
+  "cityName": "Chișinău",
   "avatarUrl": "/uploads/avatar.jpg | null",
   "createdAt": "2025-01-01T10:00:00"
 }
@@ -92,7 +95,8 @@ Fetch current user profile. Use this after login to get userId and role.
 {
   "firstName": "Ion",
   "lastName": "Popescu",
-  "phone": "+37369000000 | null"
+  "phone": "+37369000000 | null",
+  "cityId": "Long | null"
 }
 ```
 **Response `200`:** `UserResponse` (same shape as GET /users/me)
@@ -181,12 +185,10 @@ List all open repair requests (paginated).
       "createdAt": "2025-01-01T10:00:00"
     }
   ],
-  "page": {
-    "totalElements": 100,
-    "totalPages": 5,
-    "number": 0,
-    "size": 20
-  }
+  "totalElements": 100,
+  "totalPages": 5,
+  "number": 0,
+  "size": 20
 }
 ```
 
@@ -199,7 +201,7 @@ Returns the authenticated customer's own requests (paginated, same params as abo
 **Response `200`:** `RepairRequestResponse`
 
 #### `POST /api/requests` — Authenticated
-Create a new repair request.
+Create a new repair request. The city is taken automatically from the customer's profile — no need to pass it.
 
 **Request body:**
 ```json
@@ -208,16 +210,16 @@ Create a new repair request.
   "categoryId": 3,
   "title": "Schimb plăcuțe frână",
   "description": "Zgomot la frânare pe față",
-  "radiusKm": 25,
-  "cityId": 1,
-  "chisinauZoneId": null
+  "radiusKm": 25
 }
 ```
+
+> **Note:** The customer must have a city set on their profile (`PUT /api/users/me`). Returns `400` otherwise.
 
 **Response `201`:** `RepairRequestResponse`
 
 **Side effects:**
-- Sends async FCM push notifications to all auto services within `radiusKm`
+- Sends async FCM push notifications to all auto services within `radiusKm` of the customer's city
 - Updates `notifiedServicesCount` on the request
 - FREE plan shops are gated — throws `400 BusinessException` if limit reached
 

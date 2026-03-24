@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { carsApi, categoriesApi, locationsApi, requestsApi } from "@servio/api";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthBackground } from "../../components/AuthBackground";
+import * as Location from "expo-location";
 
 const STEPS = ["Mașina", "Categoria", "Problema", "Locație"];
 const RADIUS_OPTIONS = [5, 10, 25, 50];
@@ -55,6 +56,12 @@ export default function PostRequestScreen() {
   const [cityId, setCityId] = useState<number | null>(null);
   const [chisinauZoneId, setChisinauZoneId] = useState<number | null>(null);
 
+  // GPS location state
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const [showManualPicker, setShowManualPicker] = useState(false);
+  const [gpsCityName, setGpsCityName] = useState<string | null>(null);
+
   const { data: cars = [], isLoading: carsLoading } = useQuery({
     queryKey: ["cars"],
     queryFn: carsApi.getAll,
@@ -88,6 +95,57 @@ export default function PostRequestScreen() {
       router.back();
     },
   });
+
+  // Auto-detect location when reaching step 3
+  useEffect(() => {
+    if (step !== 3 || locationLabel || showManualPicker) return;
+    detectLocation();
+  }, [step]);
+
+  // Auto-select city once cities load after GPS detection
+  useEffect(() => {
+    if (!gpsCityName || cities.length === 0 || cityId) return;
+    const match = cities.find(c =>
+      c.name.toLowerCase().includes(gpsCityName.toLowerCase()) ||
+      gpsCityName.toLowerCase().includes(c.name.toLowerCase())
+    );
+    if (match) setCityId(match.id);
+  }, [cities, gpsCityName]);
+
+  async function detectLocation() {
+    setLocationLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") { setShowManualPicker(true); return; }
+
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const [geo] = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+
+      const city = geo.city ?? geo.subregion ?? null;
+      const region = geo.region ?? null;
+
+      if (city) {
+        setGpsCityName(city);
+        setLocationLabel(city);
+        if (region && regions.length > 0) {
+          const regionMatch = regions.find(r =>
+            r.name.toLowerCase().includes(region.toLowerCase()) ||
+            region.toLowerCase().includes(r.name.replace("Raionul ", "").replace("Municipiul ", "").toLowerCase())
+          );
+          if (regionMatch) setSelectedRegionId(regionMatch.id);
+        }
+      } else {
+        setShowManualPicker(true);
+      }
+    } catch {
+      setShowManualPicker(true);
+    } finally {
+      setLocationLoading(false);
+    }
+  }
 
   const canNext = () => {
     if (step === 0) return !!carId;
@@ -307,7 +365,31 @@ export default function PostRequestScreen() {
               </View>
             </View>
 
-            {/* Region picker */}
+            {/* GPS detected location */}
+            {!showManualPicker && (
+              <View style={{ gap: 8 }}>
+                <Text style={{ fontWeight: "600", color: "#1e3a5f", fontSize: 14 }}>Locație detectată</Text>
+                {locationLoading ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 14, backgroundColor: "white", borderRadius: 12, borderWidth: 1.5, borderColor: "#E8EEFF" }}>
+                    <ActivityIndicator size="small" color="#2563EB" />
+                    <Text style={{ color: "#64748B" }}>Se detectează locația...</Text>
+                  </View>
+                ) : locationLabel ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, backgroundColor: "#EFF6FF", borderRadius: 12, borderWidth: 1.5, borderColor: "#2563EB" }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <Ionicons name="location" size={18} color="#2563EB" />
+                      <Text style={{ fontWeight: "600", color: "#1e3a5f" }}>{locationLabel}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setShowManualPicker(true)}>
+                      <Text style={{ color: "#2563EB", fontSize: 13, fontWeight: "600" }}>Schimbă</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+            )}
+
+            {/* Manual region picker — shown only when user taps Schimbă or GPS fails */}
+            {showManualPicker && (
             <View style={{ gap: 8 }}>
               <Text style={{ fontWeight: "600", color: "#1e3a5f", fontSize: 14 }}>
                 Regiune <Text style={{ color: "#94A3B8", fontWeight: "400" }}>(opțional)</Text>
@@ -328,6 +410,7 @@ export default function PostRequestScreen() {
                 />
               </TouchableOpacity>
             </View>
+            )}
 
             {/* Region modal */}
             <Modal visible={regionModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setRegionModalVisible(false)}>
