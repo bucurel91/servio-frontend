@@ -6,7 +6,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { requestsApi } from "@servio/api";
-import type { RepairRequestResponse } from "@servio/types";
 
 const NEARBY_SERVICES = [
   { id: 1, name: "AutoFix", rating: 4.8, distance: "1,2 km" },
@@ -174,7 +173,7 @@ export default function HomeScreen() {
                 {!requestsLoading && activeRequests.map((req) => {
                   const s = statusStyle(req.status);
                   return (
-                    <TouchableOpacity key={req.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <TouchableOpacity key={req.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }} onPress={() => router.push(`/(customer)/request/${req.id}` as any)}>
                       <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: s.iconBg, alignItems: "center", justifyContent: "center" }}>
                         <Ionicons name={s.iconName} size={22} color={s.color} />
                       </View>

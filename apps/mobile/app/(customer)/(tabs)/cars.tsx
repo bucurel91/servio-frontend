@@ -17,6 +17,7 @@ import { carsApi } from "@servio/api";
 import { CarResponse } from "@servio/types";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthBackground } from "../../../components/AuthBackground";
+import { useRouter } from "expo-router";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -24,6 +25,7 @@ const EMPTY_FORM = { brand: "", model: "", year: "", engineType: "", vin: "" };
 
 export default function CarsScreen() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCar, setEditingCar] = useState<CarResponse | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -105,6 +107,12 @@ export default function CarsScreen() {
   }
 
   function confirmDelete(car: CarResponse) {
+    if (Platform.OS === "web") {
+      if (window.confirm(`Ștergi ${car.brand} ${car.model}?`)) {
+        deleteMutation.mutate(car.id);
+      }
+      return;
+    }
     Alert.alert(
       "Șterge mașina",
       `Ești sigur că vrei să ștergi ${car.brand} ${car.model}?`,
@@ -157,8 +165,9 @@ export default function CarsScreen() {
         ) : (
           <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
             {cars.map((car) => (
-              <View
+              <TouchableOpacity
                 key={car.id}
+                onPress={() => router.push(`/(customer)/car/${car.id}` as any)}
                 style={{
                   backgroundColor: "white", borderRadius: 16, padding: 16,
                   borderWidth: 1.5, borderColor: "#E8EEFF",
@@ -196,7 +205,7 @@ export default function CarsScreen() {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}
