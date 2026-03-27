@@ -201,20 +201,21 @@ Returns the authenticated customer's own requests (paginated, same params as abo
 **Response `200`:** `RepairRequestResponse`
 
 #### `POST /api/requests` — Authenticated
-Create a new repair request. The city is taken automatically from the customer's profile — no need to pass it.
+Create a new repair request.
 
 **Request body:**
 ```json
 {
   "carId": 2,
   "categoryId": 3,
+  "cityId": 10,
   "title": "Schimb plăcuțe frână",
   "description": "Zgomot la frânare pe față",
   "radiusKm": 25
 }
 ```
 
-> **Note:** The customer must have a city set on their profile (`PUT /api/users/me`). Returns `400` otherwise.
+> `cityId` is required — the city where the repair is needed (independent of the user's profile city). `radiusKm` defaults to 25 if omitted.
 
 **Response `201`:** `RepairRequestResponse`
 
@@ -350,6 +351,34 @@ Submit a review for an auto service.
 
 **Side effects:**
 - Recalculates `averageRating` and `reviewCount` on the `AutoServiceProfile`
+
+---
+
+## Car Makes & Models
+
+#### `GET /api/car-makes` — Public
+Returns all car makes sorted alphabetically.
+
+**Response `200`:**
+```json
+[
+  { "id": 1, "name": "Alfa Romeo" },
+  { "id": 2, "name": "Audi" }
+]
+```
+
+#### `GET /api/car-makes/{makeId}/models` — Public
+Returns all models for the given make, sorted alphabetically.
+
+**Response `200`:**
+```json
+[
+  { "id": 10, "name": "A3" },
+  { "id": 11, "name": "A4" }
+]
+```
+
+**Response `404`:** make not found
 
 ---
 

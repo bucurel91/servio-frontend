@@ -8,6 +8,8 @@ import type {
   UpdateUserRequest,
   CarRequest,
   CarResponse,
+  CarMakeResponse,
+  CarModelResponse,
   RepairRequestRequest,
   RepairRequestResponse,
   AutoServiceProfileResponse,
@@ -63,6 +65,16 @@ export const carsApi = {
 
   delete: (id: number) =>
     apiClient.delete(`/api/cars/${id}`),
+};
+
+// ─── Car Makes & Models ───────────────────────────────────────────────────────
+
+export const carMakesApi = {
+  getAll: () =>
+    apiClient.get<CarMakeResponse[]>("/api/car-makes").then((r) => r.data),
+
+  getModels: (makeId: number) =>
+    apiClient.get<CarModelResponse[]>(`/api/car-makes/${makeId}/models`).then((r) => r.data),
 };
 
 // ─── Repair Requests ──────────────────────────────────────────────────────────
@@ -147,36 +159,36 @@ export const locationsApi = {
 
 // ─── Attachments ──────────────────────────────────────────────────────────────
 
+type UploadFile = File | Blob | { uri: string; type: string; name: string };
+
+function buildFormData(file: UploadFile): FormData {
+  const form = new FormData();
+  // On React Native, FormData accepts { uri, type, name } directly.
+  // On web, file is a Blob — append with filename so the backend sees a proper part.
+  if (file instanceof Blob) {
+    const name = (file as File).name ?? "photo.jpg";
+    form.append("file", file, name);
+  } else {
+    form.append("file", file as any);
+  }
+  return form;
+}
+
 export const attachmentsApi = {
-  uploadAvatar: (file: File | Blob) => {
-    const form = new FormData();
-    form.append("file", file);
-    return apiClient
-      .post<AttachmentResponse>("/api/attachments/avatar", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data);
-  },
+  uploadAvatar: (file: UploadFile) =>
+    apiClient
+      .post<AttachmentResponse>("/api/attachments/avatar", buildFormData(file))
+      .then((r) => r.data),
 
-  uploadRequestPhoto: (requestId: number, file: File | Blob) => {
-    const form = new FormData();
-    form.append("file", file);
-    return apiClient
-      .post<AttachmentResponse>(`/api/attachments/request/${requestId}`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data);
-  },
+  uploadRequestPhoto: (requestId: number, file: UploadFile) =>
+    apiClient
+      .post<AttachmentResponse>(`/api/attachments/request/${requestId}`, buildFormData(file))
+      .then((r) => r.data),
 
-  uploadServicePhoto: (file: File | Blob) => {
-    const form = new FormData();
-    form.append("file", file);
-    return apiClient
-      .post<AttachmentResponse>("/api/attachments/service-photo", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data);
-  },
+  uploadServicePhoto: (file: UploadFile) =>
+    apiClient
+      .post<AttachmentResponse>("/api/attachments/service-photo", buildFormData(file))
+      .then((r) => r.data),
 
   delete: (id: number) =>
     apiClient.delete(`/api/attachments/${id}`),

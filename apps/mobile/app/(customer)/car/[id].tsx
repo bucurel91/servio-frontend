@@ -22,8 +22,8 @@ export default function CarDetailScreen() {
   });
 
   const { data: requestsPage } = useQuery({
-    queryKey: ["my-requests"],
-    queryFn: () => requestsApi.getMy(),
+    queryKey: ["my-requests-all"],
+    queryFn: () => requestsApi.getMy({ size: 100 }),
   });
 
   const deleteMutation = useMutation({
@@ -31,6 +31,11 @@ export default function CarDetailScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cars"] });
       router.back();
+    },
+    onError: () => {
+      const msg = "Nu se poate șterge o mașină cu cereri active. Închide mai întâi toate cererile.";
+      if (Platform.OS === "web") { window.alert(msg); return; }
+      Alert.alert("Nu se poate șterge", msg);
     },
   });
 
@@ -59,11 +64,17 @@ export default function CarDetailScreen() {
     );
   }
 
+  const hasActiveRequests = carRequests.some((r) => r.status === "OPEN");
+
   function confirmDelete() {
+    if (hasActiveRequests) {
+      const msg = "Nu se poate șterge o mașină cu cereri active. Închide mai întâi toate cererile.";
+      if (Platform.OS === "web") { window.alert(msg); return; }
+      Alert.alert("Nu se poate șterge", msg);
+      return;
+    }
     if (Platform.OS === "web") {
-      if (window.confirm(`Ștergi ${car!.brand} ${car!.model}?`)) {
-        deleteMutation.mutate();
-      }
+      if (window.confirm(`Ștergi ${car!.brand} ${car!.model}?`)) deleteMutation.mutate();
       return;
     }
     Alert.alert(
@@ -91,8 +102,8 @@ export default function CarDetailScreen() {
           <Text style={{ flex: 1, textAlign: "center", fontWeight: "700", fontSize: 17, color: "#1e3a5f" }}>
             {car.brand} {car.model}
           </Text>
-          <TouchableOpacity onPress={confirmDelete} style={{ padding: 4 }}>
-            <Ionicons name="trash-outline" size={22} color="#EF4444" />
+          <TouchableOpacity onPress={confirmDelete} style={{ padding: 4 }} disabled={deleteMutation.isPending}>
+            <Ionicons name="trash-outline" size={22} color={hasActiveRequests ? "#FCA5A5" : "#EF4444"} />
           </TouchableOpacity>
         </View>
 

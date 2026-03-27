@@ -32,6 +32,7 @@ export interface UpdateUserRequest {
   firstName: string;
   lastName: string;
   phone?: string | null;
+  cityId?: number | null;
 }
 
 export interface UserResponse {
@@ -111,11 +112,10 @@ export interface AttachmentResponse {
 export interface RepairRequestRequest {
   carId: number;
   categoryId: number;
+  cityId: number;
   title: string;
   description: string;
   radiusKm?: number;
-  cityId?: number | null;
-  chisinauZoneId?: number | null;
 }
 
 export interface RepairRequestResponse {
@@ -213,6 +213,18 @@ export interface SubscriptionResponse {
 export interface FcmTokenRequest {
   token: string;
   deviceType: DeviceType;
+}
+
+// ─── Car Makes & Models ───────────────────────────────────────────────────────
+
+export interface CarMakeResponse {
+  id: number;
+  name: string;
+}
+
+export interface CarModelResponse {
+  id: number;
+  name: string;
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────

@@ -29,6 +29,13 @@ export default function CustomerTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="requests"
+        options={{
+          title: "Cereri",
+          tabBarIcon: tabIcon("document-text-outline", "document-text"),
+        }}
+      />
+      <Tabs.Screen
         name="cars"
         options={{
           title: "Mașini",

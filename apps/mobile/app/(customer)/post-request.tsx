@@ -9,14 +9,25 @@ import {
   Modal,
   FlatList,
   Pressable,
+  Image,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { carsApi, categoriesApi, locationsApi, requestsApi } from "@servio/api";
+import { carsApi, categoriesApi, locationsApi, requestsApi, attachmentsApi } from "@servio/api";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthBackground } from "../../components/AuthBackground";
 import * as Location from "expo-location";
+import * as ImagePicker from "expo-image-picker";
+
+async function photoToFile(photo: ImagePicker.ImagePickerAsset): Promise<Blob | { uri: string; type: string; name: string }> {
+  if (Platform.OS === "web") {
+    const res = await fetch(photo.uri);
+    return res.blob();
+  }
+  return { uri: photo.uri, type: photo.mimeType ?? "image/jpeg", name: photo.fileName ?? "photo.jpg" };
+}
 
 const STEPS = ["Mașina", "Categoria", "Problema", "Locație"];
 const RADIUS_OPTIONS = [5, 10, 25, 50];
@@ -49,6 +60,7 @@ export default function PostRequestScreen() {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [photos, setPhotos] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [radiusKm, setRadiusKm] = useState(25);
   const [selectedRegionId, setSelectedRegionId] = useState<number | null>(null);
   const [regionModalVisible, setRegionModalVisible] = useState(false);
@@ -90,11 +102,36 @@ export default function PostRequestScreen() {
 
   const mutation = useMutation({
     mutationFn: requestsApi.create,
-    onSuccess: () => {
+    onSuccess: async (created) => {
+      // Upload photos after request is created
+      await Promise.allSettled(
+        photos.map(async (photo) => {
+          const file = await photoToFile(photo);
+          return attachmentsApi.uploadRequestPhoto(created.id, file as any);
+        })
+      );
       queryClient.invalidateQueries({ queryKey: ["my-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["my-requests-all"] });
       router.back();
     },
   });
+
+  async function pickPhotos() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      quality: 0.8,
+      selectionLimit: 5,
+    });
+    if (!result.canceled) {
+      setPhotos((prev) => {
+        const combined = [...prev, ...result.assets];
+        return combined.slice(0, 5);
+      });
+    }
+  }
 
   // Auto-detect location when reaching step 3
   useEffect(() => {
@@ -151,19 +188,19 @@ export default function PostRequestScreen() {
     if (step === 0) return !!carId;
     if (step === 1) return !!categoryId;
     if (step === 2) return title.trim().length > 0 && description.trim().length > 0;
+    if (step === 3) return !!cityId;
     return true;
   };
 
   const handleSubmit = () => {
-    if (!carId || !categoryId) return;
+    if (!carId || !categoryId || !cityId) return;
     mutation.mutate({
       carId,
       categoryId,
+      cityId,
       title: title.trim(),
       description: description.trim(),
       radiusKm,
-      cityId: cityId ?? undefined,
-      chisinauZoneId: chisinauZoneId ?? undefined,
     });
   };
 
@@ -329,6 +366,55 @@ export default function PostRequestScreen() {
                   fontSize: 15, color: "#1e3a5f", minHeight: 140, textAlignVertical: "top",
                 }}
               />
+            </View>
+
+            {/* Photos */}
+            <View style={{ gap: 10 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <Text style={{ fontWeight: "600", color: "#1e3a5f", fontSize: 14 }}>
+                  Fotografii <Text style={{ color: "#94A3B8", fontWeight: "400" }}>(opțional, max 5)</Text>
+                </Text>
+                {photos.length < 5 && (
+                  <TouchableOpacity onPress={pickPhotos} style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#EFF6FF", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 }}>
+                    <Ionicons name="add" size={16} color="#2563EB" />
+                    <Text style={{ fontSize: 13, color: "#2563EB", fontWeight: "600" }}>Adaugă</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {photos.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                  {photos.map((photo, i) => (
+                    <View key={i} style={{ position: "relative" }}>
+                      <Image source={{ uri: photo.uri }} style={{ width: 90, height: 90, borderRadius: 12, borderWidth: 1.5, borderColor: "#E8EEFF" }} />
+                      <TouchableOpacity
+                        onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                        style={{ position: "absolute", top: -6, right: -6, width: 22, height: 22, borderRadius: 11, backgroundColor: "#EF4444", alignItems: "center", justifyContent: "center" }}
+                      >
+                        <Ionicons name="close" size={13} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  {photos.length < 5 && (
+                    <TouchableOpacity
+                      onPress={pickPhotos}
+                      style={{ width: 90, height: 90, borderRadius: 12, borderWidth: 1.5, borderColor: "#E8EEFF", borderStyle: "dashed", backgroundColor: "#F8FAFF", alignItems: "center", justifyContent: "center" }}
+                    >
+                      <Ionicons name="camera-outline" size={24} color="#94A3B8" />
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
+              )}
+
+              {photos.length === 0 && (
+                <TouchableOpacity
+                  onPress={pickPhotos}
+                  style={{ borderRadius: 12, borderWidth: 1.5, borderColor: "#E8EEFF", borderStyle: "dashed", backgroundColor: "#F8FAFF", padding: 24, alignItems: "center", gap: 8 }}
+                >
+                  <Ionicons name="camera-outline" size={32} color="#94A3B8" />
+                  <Text style={{ fontSize: 13, color: "#94A3B8" }}>Adaugă fotografii ale problemei</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}

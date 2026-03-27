@@ -1,10 +1,19 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Image, Modal, FlatList, Dimensions, StatusBar, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { requestsApi } from "@servio/api";
+import { requestsApi, apiClient } from "@servio/api";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthBackground } from "../../../components/AuthBackground";
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+
+function getImageUrl(path: string) {
+  if (path.startsWith("http")) return path;
+  const base = (apiClient.defaults.baseURL ?? "http://localhost:8080").replace(/\/$/, "");
+  return `${base}${path}`;
+}
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentProps<typeof Ionicons>["name"] }> = {
   OPEN:   { label: "Activă",  color: "#F59E0B", bg: "#FEF3C7", icon: "time-outline" },
@@ -15,6 +24,7 @@ export default function RequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const { data: req, isLoading } = useQuery({
     queryKey: ["request", id],
@@ -23,13 +33,18 @@ export default function RequestDetailScreen() {
 
   const closeMutation = useMutation({
     mutationFn: () => requestsApi.close(Number(id)),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["request", id], updated);
       queryClient.invalidateQueries({ queryKey: ["my-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["request", id] });
+      queryClient.invalidateQueries({ queryKey: ["my-requests-all"] });
     },
   });
 
   function confirmClose() {
+    if (Platform.OS === "web") {
+      if (window.confirm("Ești sigur că vrei să închizi această cerere?")) closeMutation.mutate();
+      return;
+    }
     Alert.alert(
       "Închide cererea",
       "Ești sigur că vrei să închizi această cerere?",
@@ -145,6 +160,132 @@ export default function RequestDetailScreen() {
               </View>
             </View>
           </View>
+
+          {/* Photos */}
+          <View style={{
+            backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 18,
+            padding: 16, gap: 12,
+            borderWidth: 1, borderColor: "rgba(147,197,253,0.4)",
+          }}>
+            <Text style={{ fontSize: 15, fontWeight: "700", color: "#1e3a5f" }}>
+              Fotografii {req.photos.length > 0 ? `(${req.photos.length})` : ""}
+            </Text>
+
+            {req.photos.length === 0 ? (
+              <View style={{ alignItems: "center", paddingVertical: 20, gap: 8 }}>
+                <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="camera-outline" size={26} color="#CBD5E1" />
+                </View>
+                <Text style={{ fontSize: 13, color: "#94A3B8" }}>Nicio fotografie atașată</Text>
+              </View>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+                <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 4 }}>
+                  {req.photos.map((photo, index) => (
+                    <TouchableOpacity
+                      key={photo.id}
+                      onPress={() => setLightboxIndex(index)}
+                      activeOpacity={0.85}
+                      style={{
+                        width: 90, height: 90, borderRadius: 12, overflow: "hidden",
+                        borderWidth: 1.5, borderColor: "rgba(147,197,253,0.5)",
+                      }}
+                    >
+                      <Image
+                        source={{ uri: getImageUrl(photo.url) }}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+
+          {/* Lightbox */}
+          <Modal
+            visible={lightboxIndex !== null}
+            transparent
+            animationType="fade"
+            statusBarTranslucent
+            onRequestClose={() => setLightboxIndex(null)}
+          >
+            <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.95)", justifyContent: "center", alignItems: "center" }}>
+              {/* Close button */}
+              <TouchableOpacity
+                onPress={() => setLightboxIndex(null)}
+                style={{ position: "absolute", top: Platform.OS === "ios" ? 56 : 36, right: 20, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" }}
+              >
+                <Ionicons name="close" size={22} color="white" />
+              </TouchableOpacity>
+
+              {/* Counter */}
+              {req.photos.length > 1 && (
+                <View style={{ position: "absolute", top: Platform.OS === "ios" ? 62 : 42, left: 0, right: 0, alignItems: "center", zIndex: 10 }}>
+                  <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: "600" }}>
+                    {(lightboxIndex ?? 0) + 1} / {req.photos.length}
+                  </Text>
+                </View>
+              )}
+
+              {/* Main image */}
+              {lightboxIndex !== null && (
+                <Image
+                  source={{ uri: getImageUrl(req.photos[lightboxIndex].url) }}
+                  style={{ width: SCREEN_W, height: SCREEN_H * 0.75 }}
+                  resizeMode="contain"
+                />
+              )}
+
+              {/* Prev / Next arrows */}
+              {req.photos.length > 1 && (
+                <>
+                  <TouchableOpacity
+                    onPress={() => setLightboxIndex((i) => (i !== null && i > 0 ? i - 1 : i))}
+                    style={{ position: "absolute", left: 12, padding: 10, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.12)" }}
+                    disabled={lightboxIndex === 0}
+                  >
+                    <Ionicons name="chevron-back" size={26} color={lightboxIndex === 0 ? "rgba(255,255,255,0.3)" : "white"} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setLightboxIndex((i) => (i !== null && i < req.photos.length - 1 ? i + 1 : i))}
+                    style={{ position: "absolute", right: 12, padding: 10, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.12)" }}
+                    disabled={lightboxIndex === req.photos.length - 1}
+                  >
+                    <Ionicons name="chevron-forward" size={26} color={lightboxIndex === req.photos.length - 1 ? "rgba(255,255,255,0.3)" : "white"} />
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* Thumbnail strip */}
+              {req.photos.length > 1 && (
+                <View style={{ position: "absolute", bottom: Platform.OS === "ios" ? 48 : 28, left: 0, right: 0 }}>
+                  <FlatList
+                    data={req.photos}
+                    keyExtractor={(p) => String(p.id)}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+                    renderItem={({ item, index }) => (
+                      <TouchableOpacity onPress={() => setLightboxIndex(index)} activeOpacity={0.8}>
+                        <Image
+                          source={{ uri: getImageUrl(item.url) }}
+                          style={{
+                            width: 56, height: 56, borderRadius: 8,
+                            borderWidth: 2,
+                            borderColor: lightboxIndex === index ? "#60A5FA" : "rgba(255,255,255,0.25)",
+                            opacity: lightboxIndex === index ? 1 : 0.55,
+                          }}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              )}
+            </View>
+          </Modal>
 
           {/* Close button — only for OPEN requests */}
           {req.status === "OPEN" && (

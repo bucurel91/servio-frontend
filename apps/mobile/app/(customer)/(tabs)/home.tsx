@@ -162,9 +162,12 @@ export default function HomeScreen() {
 
             {/* Cereri active */}
             <View>
-              <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f", marginBottom: 10 }}>
-                Cereri active
-              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f" }}>Cereri active</Text>
+                <TouchableOpacity onPress={() => router.push("/(customer)/(tabs)/requests")}>
+                  <Text style={{ fontSize: 13, color: "#2563EB", fontWeight: "500" }}>Vezi toate {">"}</Text>
+                </TouchableOpacity>
+              </View>
               <View style={{ gap: 10 }}>
                 {requestsLoading && (
                   <ActivityIndicator color="#2563EB" style={{ marginVertical: 12 }} />

@@ -7,6 +7,8 @@ export default function CustomerLayout() {
       <Stack.Screen name="post-request" />
       <Stack.Screen name="car/[id]" />
       <Stack.Screen name="request/[id]" />
+      <Stack.Screen name="service/[id]" />
+      <Stack.Screen name="service-reviews/[userId]" />
     </Stack>
   );
 }
