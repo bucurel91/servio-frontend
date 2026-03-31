@@ -38,6 +38,13 @@ export default function RequestDetailScreen() {
       queryClient.invalidateQueries({ queryKey: ["my-requests"] });
       queryClient.invalidateQueries({ queryKey: ["my-requests-all"] });
     },
+    onError: () => {
+      if (Platform.OS === "web") {
+        window.alert("A apărut o eroare la închiderea cererii. Încearcă din nou.");
+        return;
+      }
+      Alert.alert("Eroare", "A apărut o eroare la închiderea cererii. Încearcă din nou.");
+    },
   });
 
   function confirmClose() {

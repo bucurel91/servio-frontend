@@ -137,7 +137,7 @@ export default function PostRequestScreen() {
   useEffect(() => {
     if (step !== 3 || locationLabel || showManualPicker) return;
     detectLocation();
-  }, [step]);
+  }, [step, locationLabel, showManualPicker]);
 
   // Auto-select city once cities load after GPS detection
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function PostRequestScreen() {
       gpsCityName.toLowerCase().includes(c.name.toLowerCase())
     );
     if (match) setCityId(match.id);
-  }, [cities, gpsCityName]);
+  }, [cities, gpsCityName, cityId]);
 
   async function detectLocation() {
     setLocationLoading(true);
@@ -198,6 +198,7 @@ export default function PostRequestScreen() {
       carId,
       categoryId,
       cityId,
+      chisinauZoneId,
       title: title.trim(),
       description: description.trim(),
       radiusKm,

@@ -231,7 +231,7 @@ export default function ServiceDetailScreen() {
                 ))}
                 {service.reviewCount > 5 && (
                   <TouchableOpacity
-                    onPress={() => router.push(`/service-reviews/${service.userId}` as any)}
+                    onPress={() => router.push(`/(customer)/service-reviews/${service.userId}` as any)}
                     style={{
                       flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
                       backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 16, padding: 14,

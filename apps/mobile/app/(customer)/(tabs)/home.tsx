@@ -220,7 +220,7 @@ export default function HomeScreen() {
               </View>
               <View style={{ gap: 10 }}>
                 {NEARBY_SERVICES.map((s) => (
-                  <TouchableOpacity key={s.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <TouchableOpacity key={s.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }} onPress={() => router.push("/(customer)/(tabs)/services")} activeOpacity={0.85}>
                     <View style={{
                       width: 44, height: 44, borderRadius: 22,
                       backgroundColor: "#EFF6FF",

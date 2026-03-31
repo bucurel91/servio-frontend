@@ -147,7 +147,7 @@ export default function RequestsScreen() {
             renderItem={({ item }) => (
               <RequestCard
                 req={item}
-                onPress={() => router.push(`/request/${item.id}` as any)}
+                onPress={() => router.push(`/(customer)/request/${item.id}` as any)}
               />
             )}
             ListEmptyComponent={

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -130,7 +130,7 @@ export default function ServicesScreen() {
   const router = useRouter();
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isRefetching, isError, refetch } = useQuery({
     queryKey: ["services"],
     queryFn: () => servicesApi.getAll({ size: 50 }),
   });
@@ -149,7 +149,7 @@ export default function ServicesScreen() {
     <AuthBackground>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Header */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
           <Text style={{ fontSize: 24, fontWeight: "800", color: "#1e3a5f" }}>
             Service-uri auto
           </Text>
@@ -216,7 +216,7 @@ export default function ServicesScreen() {
                   <ServiceCard
                     key={service.id}
                     service={service}
-                    onPress={() => router.push(`/service/${service.id}` as any)}
+                    onPress={() => router.push(`/(customer)/service/${service.id}` as any)}
                   />
                 ))}
               </>

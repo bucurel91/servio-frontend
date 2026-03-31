@@ -209,13 +209,14 @@ Create a new repair request.
   "carId": 2,
   "categoryId": 3,
   "cityId": 10,
+  "chisinauZoneId": 2,
   "title": "Schimb plăcuțe frână",
   "description": "Zgomot la frânare pe față",
   "radiusKm": 25
 }
 ```
 
-> `cityId` is required — the city where the repair is needed (independent of the user's profile city). `radiusKm` defaults to 25 if omitted.
+> `cityId` is required — the city where the repair is needed (independent of the user's profile city). `chisinauZoneId` is optional — only relevant when `cityId` refers to Chișinău; use `GET /api/locations/chisinau-zones` to list sectors. `radiusKm` defaults to 25 if omitted.
 
 **Response `201`:** `RepairRequestResponse`
 
