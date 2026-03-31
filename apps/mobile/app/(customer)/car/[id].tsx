@@ -153,7 +153,7 @@ export default function CarDetailScreen() {
               carRequests.map((req) => {
                 const status = STATUS_CONFIG[req.status] ?? STATUS_CONFIG.OPEN;
                 return (
-                  <View key={req.id} style={{
+                  <TouchableOpacity key={req.id} onPress={() => router.push(`/(customer)/request/${req.id}` as any)} style={{
                     backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 14,
                     padding: 16, gap: 6,
                     borderWidth: 1, borderColor: "#E8EEFF",
@@ -175,7 +175,7 @@ export default function CarDetailScreen() {
                       {new Intl.DateTimeFormat("ro-RO", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(req.createdAt))}
                       {req.notifiedServicesCount > 0 ? `  ·  ${req.notifiedServicesCount} service-uri notificate` : ""}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 );
               })
             )}

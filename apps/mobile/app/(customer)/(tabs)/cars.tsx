@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   ActivityIndicator, Modal, Alert, KeyboardAvoidingView, Platform, FlatList,
@@ -56,6 +56,13 @@ export default function CarsScreen() {
     queryFn: () => carMakesApi.getModels(selectedMakeId!),
     enabled: !!selectedMakeId,
   });
+
+  // When editing, auto-select the make ID once makes are loaded
+  useEffect(() => {
+    if (!editingCar || !makes.length || selectedMakeId) return;
+    const match = makes.find((m) => m.name === editingCar.brand);
+    if (match) setSelectedMakeId(match.id);
+  }, [editingCar, makes, selectedMakeId]);
 
   const createMutation = useMutation({
     mutationFn: (data: Parameters<typeof carsApi.create>[0]) => carsApi.create(data),

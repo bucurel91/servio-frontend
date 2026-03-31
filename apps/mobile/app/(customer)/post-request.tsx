@@ -629,10 +629,11 @@ export default function PostRequestScreen() {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || !canNext()}
             onPress={handleSubmit}
             style={{
-              backgroundColor: "#2563EB", borderRadius: 14,
+              backgroundColor: mutation.isPending || !canNext() ? "#C7D4F5" : "#2563EB",
+              borderRadius: 14,
               paddingVertical: 16, alignItems: "center",
             }}
           >

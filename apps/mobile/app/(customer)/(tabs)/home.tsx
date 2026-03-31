@@ -5,23 +5,8 @@ import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import { requestsApi } from "@servio/api";
+import { requestsApi, servicesApi } from "@servio/api";
 
-const NEARBY_SERVICES = [
-  { id: 1, name: "AutoFix", rating: 4.8, distance: "1,2 km" },
-  { id: 2, name: "CarPro Service", rating: 4.7, distance: "2,0 km" },
-];
-
-function Stars({ rating }: { rating: number }) {
-  return (
-    <View style={{ flexDirection: "row", gap: 2, marginTop: 3 }}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Ionicons key={i} name={i <= Math.round(rating) ? "star" : "star-outline"} size={12} color="#F59E0B" />
-      ))}
-      <Text style={{ fontSize: 12, color: "#6b7280", marginLeft: 4 }}>{rating}</Text>
-    </View>
-  );
-}
 
 const CARD: object = {
   backgroundColor: "rgba(255,255,255,0.88)",
@@ -46,10 +31,16 @@ export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
 
   const { data: requestsPage, isLoading: requestsLoading } = useQuery({
-    queryKey: ["my-requests"],
-    queryFn: () => requestsApi.getMy({ size: 5 }),
+    queryKey: ["my-requests", "OPEN"],
+    queryFn: () => requestsApi.getMy({ status: "OPEN", size: 5 }),
   });
   const activeRequests = requestsPage?.content ?? [];
+
+  const { data: servicesPage } = useQuery({
+    queryKey: ["services"],
+    queryFn: () => servicesApi.getAll({ size: 50 }),
+  });
+  const nearbyServices = (servicesPage?.content ?? []).slice(0, 3);
 
   const topX = width;
   const bottomX = width * 0.02;
@@ -211,33 +202,42 @@ export default function HomeScreen() {
             </View>
 
             {/* Service-uri aproape */}
-            <View>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f" }}>Service-uri aproape</Text>
-                <TouchableOpacity onPress={() => router.push("/(customer)/(tabs)/services")}>
-                  <Text style={{ fontSize: 13, color: "#2563EB", fontWeight: "500" }}>Vezi toate {">"}</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{ gap: 10 }}>
-                {NEARBY_SERVICES.map((s) => (
-                  <TouchableOpacity key={s.id} style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }} onPress={() => router.push("/(customer)/(tabs)/services")} activeOpacity={0.85}>
-                    <View style={{
-                      width: 44, height: 44, borderRadius: 22,
-                      backgroundColor: "#EFF6FF",
-                      alignItems: "center", justifyContent: "center",
-                    }}>
-                      <Ionicons name="construct-outline" size={22} color="#2563EB" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 15, fontWeight: "600", color: "#1e3a5f" }}>{s.name}</Text>
-                      <Stars rating={s.rating} />
-                    </View>
-                    <Text style={{ fontSize: 13, color: "#6b7280", marginRight: 4 }}>{s.distance}</Text>
-                    <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+            {nearbyServices.length > 0 && (
+              <View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f" }}>Service-uri aproape</Text>
+                  <TouchableOpacity onPress={() => router.push("/(customer)/(tabs)/services")}>
+                    <Text style={{ fontSize: 13, color: "#2563EB", fontWeight: "500" }}>Vezi toate {">"}</Text>
                   </TouchableOpacity>
-                ))}
+                </View>
+                <View style={{ gap: 10 }}>
+                  {nearbyServices.map((s) => (
+                    <TouchableOpacity
+                      key={s.id}
+                      style={{ ...CARD, flexDirection: "row", alignItems: "center", gap: 12 }}
+                      onPress={() => router.push(`/(customer)/service/${s.id}` as any)}
+                      activeOpacity={0.85}
+                    >
+                      <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "#EFF6FF", alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="construct-outline" size={22} color="#2563EB" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 15, fontWeight: "600", color: "#1e3a5f" }}>{s.businessName}</Text>
+                        {s.averageRating && (
+                          <View style={{ flexDirection: "row", gap: 2, marginTop: 3 }}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <Ionicons key={i} name={i <= Math.round(parseFloat(s.averageRating!)) ? "star" : "star-outline"} size={12} color="#F59E0B" />
+                            ))}
+                            <Text style={{ fontSize: 12, color: "#6b7280", marginLeft: 4 }}>{parseFloat(s.averageRating).toFixed(1)}</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Quick actions */}
             <View style={{ flexDirection: "row", gap: 12 }}>

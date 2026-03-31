@@ -142,17 +142,21 @@ export default function RequestDetailScreen() {
           </View>
 
           {/* Car card */}
-          <View style={{
-            backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 18,
-            padding: 20, gap: 12,
-            borderWidth: 1, borderColor: "rgba(147,197,253,0.4)",
-          }}>
+          <TouchableOpacity
+            onPress={() => router.push(`/(customer)/car/${req.car.id}` as any)}
+            activeOpacity={0.85}
+            style={{
+              backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 18,
+              padding: 20, gap: 12,
+              borderWidth: 1, borderColor: "rgba(147,197,253,0.4)",
+            }}
+          >
             <Text style={{ fontSize: 15, fontWeight: "700", color: "#1e3a5f" }}>Mașina</Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: "#EFF6FF", alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="car" size={28} color="#2563EB" />
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 17, fontWeight: "700", color: "#1e3a5f" }}>
                   {req.car.brand} {req.car.model}
                 </Text>
@@ -165,8 +169,9 @@ export default function RequestDetailScreen() {
                   </Text>
                 ) : null}
               </View>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Photos */}
           <View style={{

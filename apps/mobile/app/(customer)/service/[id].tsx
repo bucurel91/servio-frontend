@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { ServiceMap } from "../../../components/ServiceMap";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { servicesApi, reviewsApi } from "@servio/api";
@@ -189,6 +190,21 @@ export default function ServiceDetailScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+          )}
+
+          {/* Map */}
+          {service.latitude && service.longitude && (
+            <View style={{ marginHorizontal: 16, marginBottom: 16 }}>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: "#1e3a5f", marginBottom: 10 }}>
+                Locație
+              </Text>
+              <ServiceMap
+                latitude={service.latitude}
+                longitude={service.longitude}
+                businessName={service.businessName}
+                address={service.address}
+              />
             </View>
           )}
 

@@ -199,6 +199,9 @@ export default function ServicesScreen() {
           <ScrollView
             contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, paddingTop: 8 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#2563EB" />
+            }
           >
             {filtered.length === 0 ? (
               <View style={{ alignItems: "center", justifyContent: "center", paddingTop: 60 }}>

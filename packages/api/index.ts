@@ -83,7 +83,7 @@ export const requestsApi = {
   getAll: (params?: { cityId?: number; page?: number; size?: number }) =>
     apiClient.get<Page<RepairRequestResponse>>("/api/requests", { params }).then((r) => r.data),
 
-  getMy: (params?: { page?: number; size?: number }) =>
+  getMy: (params?: { status?: "OPEN" | "CLOSED"; page?: number; size?: number }) =>
     apiClient.get<Page<RepairRequestResponse>>("/api/requests/my", { params }).then((r) => r.data),
 
   getById: (id: number) =>

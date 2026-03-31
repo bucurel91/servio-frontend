@@ -193,7 +193,14 @@ List all open repair requests (paginated).
 ```
 
 #### `GET /api/requests/my` — Authenticated
-Returns the authenticated customer's own requests (paginated, same params as above).
+Returns the authenticated customer's own requests (paginated).
+
+**Query params:**
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `status` | String | — | Filter by status: `OPEN` or `CLOSED` |
+| `page` | Integer | 0 | Page number |
+| `size` | Integer | 20 | Page size |
 
 **Response `200`:** Page of `RepairRequestResponse`
 

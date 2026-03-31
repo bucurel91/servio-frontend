@@ -13,10 +13,9 @@ const STATUS_CONFIG = {
   CLOSED: { label: "Închisă", color: "#6B7280", bg: "#F3F4F6", icon: "checkmark-circle-outline" as const },
 };
 
-type FilterTab = "ALL" | "OPEN" | "CLOSED";
+type FilterTab = "OPEN" | "CLOSED";
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
-  { key: "ALL",    label: "Toate" },
   { key: "OPEN",   label: "Active" },
   { key: "CLOSED", label: "Închise" },
 ];
@@ -80,15 +79,15 @@ function RequestCard({ req, onPress }: { req: RepairRequestResponse; onPress: ()
 
 export default function RequestsScreen() {
   const router = useRouter();
-  const [filter, setFilter] = useState<FilterTab>("ALL");
+  const [filter, setFilter] = useState<FilterTab>("OPEN");
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, refetch, isRefetching, isError } = useQuery({
     queryKey: ["my-requests-all"],
     queryFn: () => requestsApi.getMy({ size: 100 }),
   });
 
   const all = data?.content ?? [];
-  const filtered = filter === "ALL" ? all : all.filter((r) => r.status === filter);
+  const filtered = all.filter((r) => r.status === filter);
 
   return (
     <AuthBackground>
@@ -104,7 +103,7 @@ export default function RequestsScreen() {
         {/* Filter tabs */}
         <View style={{ flexDirection: "row", paddingHorizontal: 16, gap: 8, marginBottom: 12 }}>
           {FILTER_TABS.map((tab) => {
-            const count = tab.key === "ALL" ? all.length : all.filter((r) => r.status === tab.key).length;
+            const count = all.filter((r) => r.status === tab.key).length;
             const active = filter === tab.key;
             return (
               <TouchableOpacity
@@ -135,6 +134,19 @@ export default function RequestsScreen() {
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <ActivityIndicator size="large" color="#2563EB" />
           </View>
+        ) : isError ? (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
+            <Ionicons name="cloud-offline-outline" size={48} color="#9CA3AF" />
+            <Text style={{ color: "#6B7280", marginTop: 12, textAlign: "center" }}>
+              Nu s-au putut încărca cererile.
+            </Text>
+            <TouchableOpacity
+              onPress={() => refetch()}
+              style={{ marginTop: 12, backgroundColor: "#2563EB", borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 }}
+            >
+              <Text style={{ color: "white", fontWeight: "600" }}>Reîncearcă</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <FlatList
             data={filtered}
@@ -156,9 +168,9 @@ export default function RequestsScreen() {
                   <Ionicons name="document-text-outline" size={32} color="#CBD5E1" />
                 </View>
                 <Text style={{ fontSize: 15, fontWeight: "600", color: "#64748B" }}>
-                  {filter === "ALL" ? "Nu ai cereri încă" : `Nu ai cereri ${filter === "OPEN" ? "active" : "închise"}`}
+                  {filter === "OPEN" ? "Nu ai cereri active" : "Nu ai cereri închise"}
                 </Text>
-                {filter === "ALL" && (
+                {filter === "OPEN" && (
                   <TouchableOpacity
                     onPress={() => router.push("/(customer)/post-request")}
                     style={{ backgroundColor: "#2563EB", borderRadius: 12, paddingHorizontal: 20, paddingVertical: 10, marginTop: 4 }}

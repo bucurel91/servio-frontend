@@ -113,6 +113,7 @@ export interface RepairRequestRequest {
   carId: number;
   categoryId: number;
   cityId: number;
+  chisinauZoneId?: number | null;
   title: string;
   description: string;
   radiusKm?: number;

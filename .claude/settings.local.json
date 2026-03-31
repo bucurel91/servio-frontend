@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \":*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Igor\\Projects\\servio-backend\\src\\main\\java\\com\\servio\\controller"
+    ]
+  }
+}
