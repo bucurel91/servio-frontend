@@ -40,7 +40,7 @@ export default function ProfileScreen() {
   }
 
   const updateMutation = useMutation({
-    mutationFn: () => usersApi.update({ firstName: form.firstName.trim(), lastName: form.lastName.trim(), phone: form.phone.trim() || null }),
+    mutationFn: () => usersApi.updateMe({ firstName: form.firstName.trim(), lastName: form.lastName.trim(), phone: form.phone.trim() || null }),
     onSuccess: (updated) => {
       queryClient.setQueryData(["me"], updated);
       setUser(updated);
@@ -56,7 +56,11 @@ export default function ProfileScreen() {
   async function pickAvatar() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permisiune necesară", "Permite accesul la galerie pentru a schimba avatarul.");
+      if (Platform.OS === "web") {
+        window.alert("Permite accesul la galerie pentru a schimba avatarul.");
+      } else {
+        Alert.alert("Permisiune necesară", "Permite accesul la galerie pentru a schimba avatarul.");
+      }
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -74,7 +78,7 @@ export default function ProfileScreen() {
       // On web, asset.uri is a blob: URL — fetch it to get a real Blob
       const response = await fetch(asset.uri);
       const blob = await response.blob();
-      avatarMutation.mutate(new File([blob], `avatar.${ext}`, { type: mimeType }));
+      avatarMutation.mutate(new File([blob], `avatar.${ext}`, { type: mimeType }) as any);
     } else {
       avatarMutation.mutate({ uri: asset.uri, type: mimeType, name: `avatar.${ext}` });
     }

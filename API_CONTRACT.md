@@ -179,6 +179,8 @@ List all open repair requests (paginated).
       "radiusKm": 25,
       "cityId": 1,
       "cityName": "Chișinău",
+      "chisinauZoneId": 2,
+      "chisinauZoneName": "Centru",
       "status": "OPEN",
       "notifiedServicesCount": 4,
       "photos": [],
@@ -270,6 +272,7 @@ List all verified auto service profiles (paginated).
       "specializedBrands": ["Volkswagen", "Audi"],
       "serviceCategories": [{ "id": 3, "name": "Frâne", "slug": "frane", "icon": null, "description": null, "sortOrder": 1, "children": [] }],
       "avatarUrl": "/uploads/logo.jpg",
+      "photos": [],
       "createdAt": "2025-01-01T10:00:00"
     }
   ],

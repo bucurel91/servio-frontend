@@ -130,6 +130,8 @@ export interface RepairRequestResponse {
   radiusKm: number;
   cityId: number | null;
   cityName: string | null;
+  chisinauZoneId: number | null;
+  chisinauZoneName: string | null;
   status: RequestStatus;
   notifiedServicesCount: number;
   photos: AttachmentResponse[];
@@ -174,6 +176,7 @@ export interface AutoServiceProfileResponse {
   specializedBrands: string[];
   serviceCategories: CategoryResponse[];
   avatarUrl: string | null;
+  photos: AttachmentResponse[];
   createdAt: string;
 }
 
