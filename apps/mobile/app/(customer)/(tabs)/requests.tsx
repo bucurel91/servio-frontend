@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { requestsApi } from "@servio/api";
 import { AuthBackground } from "../../../components/AuthBackground";
-import type { RepairRequestResponse } from "@servio/types";
+import type { RepairRequestDetailResponse } from "@servio/types";
 
 const STATUS_CONFIG = {
   OPEN:   { label: "Activă",  color: "#F59E0B", bg: "#FEF3C7", icon: "time-outline" as const },
@@ -20,7 +20,7 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: "CLOSED", label: "Închise" },
 ];
 
-function RequestCard({ req, onPress }: { req: RepairRequestResponse; onPress: () => void }) {
+function RequestCard({ req, onPress }: { req: RepairRequestDetailResponse; onPress: () => void }) {
   const s = STATUS_CONFIG[req.status] ?? STATUS_CONFIG.OPEN;
   const date = new Intl.DateTimeFormat("ro-MD", { day: "numeric", month: "short", year: "numeric" }).format(new Date(req.createdAt));
 

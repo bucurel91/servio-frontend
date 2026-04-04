@@ -119,14 +119,32 @@ export interface RepairRequestRequest {
   radiusKm?: number;
 }
 
-export interface RepairRequestResponse {
+export interface RepairRequestSummaryResponse {
+  id: number;
+  customerName: string;
+  title: string;
+  status: RequestStatus;
+  carBrand: string;
+  carModel: string;
+  carYear: number;
+  categoryName: string | null;
+  cityId: number | null;
+  cityName: string | null;
+  chisinauZoneName: string | null;
+  notifiedServicesCount: number;
+  photoCount: number;
+  createdAt: string;
+}
+
+export interface RepairRequestDetailResponse {
   id: number;
   customerId: number;
   customerName: string;
+  customerPhone: string | null;
   car: CarResponse;
-  category: CategoryResponse;
+  category: CategoryResponse | null;
   title: string;
-  description: string;
+  description: string | null;
   radiusKm: number;
   cityId: number | null;
   cityName: string | null;
@@ -136,7 +154,11 @@ export interface RepairRequestResponse {
   notifiedServicesCount: number;
   photos: AttachmentResponse[];
   createdAt: string;
+
 }
+
+/** @deprecated Use RepairRequestSummaryResponse or RepairRequestDetailResponse */
+export type RepairRequestResponse = RepairRequestDetailResponse;
 
 // ─── Auto Service Profile ─────────────────────────────────────────────────────
 

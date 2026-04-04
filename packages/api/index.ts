@@ -11,7 +11,8 @@ import type {
   CarMakeResponse,
   CarModelResponse,
   RepairRequestRequest,
-  RepairRequestResponse,
+  RepairRequestSummaryResponse,
+  RepairRequestDetailResponse,
   AutoServiceProfileResponse,
   UpdateAutoServiceProfileRequest,
   ReviewRequest,
@@ -81,19 +82,31 @@ export const carMakesApi = {
 
 export const requestsApi = {
   getAll: (params?: { cityId?: number; page?: number; size?: number }) =>
-    apiClient.get<Page<RepairRequestResponse>>("/api/requests", { params }).then((r) => r.data),
+    apiClient.get<Page<RepairRequestSummaryResponse>>("/api/requests", { params }).then((r) => r.data),
 
   getMy: (params?: { status?: "OPEN" | "CLOSED"; page?: number; size?: number }) =>
-    apiClient.get<Page<RepairRequestResponse>>("/api/requests/my", { params }).then((r) => r.data),
+    apiClient.get<Page<RepairRequestDetailResponse>>("/api/requests/my", { params }).then((r) => r.data),
+
+  getServiceInbox: (params?: { page?: number; size?: number }) =>
+    apiClient.get<Page<RepairRequestSummaryResponse>>("/api/requests/service/inbox", { params }).then((r) => r.data),
 
   getById: (id: number) =>
-    apiClient.get<RepairRequestResponse>(`/api/requests/${id}`).then((r) => r.data),
+    apiClient.get<RepairRequestDetailResponse>(`/api/requests/${id}`).then((r) => r.data),
+
+  viewDetail: (id: number) =>
+    apiClient.get<RepairRequestDetailResponse>(`/api/requests/${id}/details`).then((r) => r.data),
 
   create: (data: RepairRequestRequest) =>
-    apiClient.post<RepairRequestResponse>("/api/requests", data).then((r) => r.data),
+    apiClient.post<RepairRequestSummaryResponse>("/api/requests", data).then((r) => r.data),
+
+  accept: (id: number) =>
+    apiClient.post<RepairRequestDetailResponse>(`/api/requests/${id}/accept`).then((r) => r.data),
+
+  reject: (id: number) =>
+    apiClient.post<void>(`/api/requests/${id}/reject`).then((r) => r.data),
 
   close: (id: number) =>
-    apiClient.patch<RepairRequestResponse>(`/api/requests/${id}/close`).then((r) => r.data),
+    apiClient.patch<RepairRequestDetailResponse>(`/api/requests/${id}/close`).then((r) => r.data),
 };
 
 // ─── Auto Services ────────────────────────────────────────────────────────────

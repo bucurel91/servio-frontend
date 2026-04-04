@@ -154,8 +154,12 @@ Returns the authenticated customer's cars.
 
 ## Repair Requests
 
+Two response shapes are used depending on context:
+- **`RepairRequestSummaryResponse`** — lean list shape (no description, no photos array, flat car fields, `photoCount` integer). Used by public feed and service inbox.
+- **`RepairRequestDetailResponse`** — full shape (nested car/category objects, description, photos array, customer phone). Used by customer list, detail view, accept/close responses.
+
 #### `GET /api/requests` — Public
-List all open repair requests (paginated).
+List all open repair requests (paginated). Returns lean summary shape.
 
 **Query params:**
 | Param | Type | Default | Description |
@@ -164,26 +168,24 @@ List all open repair requests (paginated).
 | `page` | Integer | 0 | Page number |
 | `size` | Integer | 20 | Page size |
 
-**Response `200`:** Page of `RepairRequestResponse`
+**Response `200`:** Page of `RepairRequestSummaryResponse`
 ```json
 {
   "content": [
     {
       "id": 1,
-      "customerId": 5,
       "customerName": "Ion Popescu",
-      "car": { "id": 2, "brand": "VW", "model": "Golf", "year": 2018, "engineType": null, "vin": null, "createdAt": "..." },
-      "category": { "id": 3, "name": "Frâne", "slug": "frane", "icon": null, "description": null, "sortOrder": 1, "children": [] },
       "title": "Schimb plăcuțe frână",
-      "description": "Zgomot la frânare pe față",
-      "radiusKm": 25,
+      "status": "OPEN",
+      "carBrand": "VW",
+      "carModel": "Golf",
+      "carYear": 2018,
+      "categoryName": "Frâne",
       "cityId": 1,
       "cityName": "Chișinău",
-      "chisinauZoneId": 2,
       "chisinauZoneName": "Centru",
-      "status": "OPEN",
       "notifiedServicesCount": 4,
-      "photos": [],
+      "photoCount": 2,
       "createdAt": "2025-01-01T10:00:00"
     }
   ],
@@ -195,7 +197,7 @@ List all open repair requests (paginated).
 ```
 
 #### `GET /api/requests/my` — Authenticated
-Returns the authenticated customer's own requests (paginated).
+Returns the authenticated customer's own requests (paginated). Returns full detail shape so the list can show photos, category, and car without a second request.
 
 **Query params:**
 | Param | Type | Default | Description |
@@ -204,10 +206,43 @@ Returns the authenticated customer's own requests (paginated).
 | `page` | Integer | 0 | Page number |
 | `size` | Integer | 20 | Page size |
 
-**Response `200`:** Page of `RepairRequestResponse`
+**Response `200`:** Page of `RepairRequestDetailResponse`
+
+#### `GET /api/requests/service/inbox` — Authenticated (`AUTO_SERVICE` role)
+Returns requests this service was notified about (interaction statuses: NOTIFIED, VIEWED, ACCEPTED). Returns lean summary shape — full detail is fetched separately when a request is tapped.
+
+**Response `200`:** Page of `RepairRequestSummaryResponse`
 
 #### `GET /api/requests/{id}` — Public
-**Response `200`:** `RepairRequestResponse`
+Full request detail.
+
+**Response `200`:** `RepairRequestDetailResponse`
+```json
+{
+  "id": 1,
+  "customerId": 5,
+  "customerName": "Ion Popescu",
+  "customerPhone": "+37369000000",
+  "car": { "id": 2, "brand": "VW", "model": "Golf", "year": 2018, "engineType": null, "vin": null, "createdAt": "..." },
+  "category": { "id": 3, "name": "Frâne", "slug": "frane", "icon": null, "description": null, "sortOrder": 1, "children": [] },
+  "title": "Schimb plăcuțe frână",
+  "description": "Zgomot la frânare pe față",
+  "radiusKm": 25,
+  "cityId": 1,
+  "cityName": "Chișinău",
+  "chisinauZoneId": 2,
+  "chisinauZoneName": "Centru",
+  "status": "OPEN",
+  "notifiedServicesCount": 4,
+  "photos": [],
+  "createdAt": "2025-01-01T10:00:00"
+}
+```
+
+#### `GET /api/requests/{id}/details` — Authenticated (`AUTO_SERVICE` role)
+View full request detail as a service. On first view, records the interaction as VIEWED. Returns the same shape as `GET /api/requests/{id}`.
+
+**Response `200`:** `RepairRequestDetailResponse`
 
 #### `POST /api/requests` — Authenticated
 Create a new repair request.
@@ -225,19 +260,28 @@ Create a new repair request.
 }
 ```
 
-> `cityId` is required — the city where the repair is needed (independent of the user's profile city). `chisinauZoneId` is optional — only relevant when `cityId` refers to Chișinău; use `GET /api/locations/chisinau-zones` to list sectors. `radiusKm` defaults to 25 if omitted.
+> `cityId` is required. `chisinauZoneId` optional (Chișinău only). `radiusKm` defaults to 25.
 
-**Response `201`:** `RepairRequestResponse`
+**Response `201`:** `RepairRequestSummaryResponse`
 
 **Side effects:**
-- Sends async FCM push notifications to all auto services within `radiusKm` of the customer's city
-- Updates `notifiedServicesCount` on the request
-- FREE plan shops are gated — throws `400 BusinessException` if limit reached
+- Sends FCM push notifications to all auto services within `radiusKm`
+- Creates `RepairRequestInteraction` records (status `NOTIFIED`) for each eligible service
+
+#### `POST /api/requests/{id}/accept` — Authenticated (`AUTO_SERVICE` role)
+Accept a request. Must have called `GET /{id}/details` first. Notifies other services that the request is taken.
+
+**Response `200`:** `RepairRequestDetailResponse`
+
+#### `POST /api/requests/{id}/reject` — Authenticated (`AUTO_SERVICE` role)
+Reject a request.
+
+**Response `204`**
 
 #### `PATCH /api/requests/{id}/close` — Authenticated (request owner only)
 Closes a repair request.
 
-**Response `200`:** `RepairRequestResponse` with `status: "CLOSED"`
+**Response `200`:** `RepairRequestDetailResponse` with `status: "CLOSED"`
 
 ---
 

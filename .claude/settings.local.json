@@ -4,7 +4,8 @@
       "Bash(node -e \":*)",
       "Read(//c/Users/Igor/Projects/servio-backend/src/main/java/com/servio/repository/**)",
       "Read(//c/Users/Igor/Projects/servio-backend/**)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebSearch"
     ],
     "additionalDirectories": [
       "C:\\Users\\Igor\\Projects\\servio-backend\\src\\main\\java\\com\\servio\\controller",
